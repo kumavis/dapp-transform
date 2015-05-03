@@ -1,0 +1,33 @@
+<html>
+  <head>
+  </head>
+  <body>
+    <script>
+
+var tests = [
+  {
+    message: '"this" should be "window"',
+    test: (this === window),
+  }, {
+    message: '"window" should not be original "window"',
+    test: (window !== _document.__runtimeContext__.originalWindow),
+  }, {
+    message: '"window" should be fake "window"',
+    test: (window === _document.__runtimeContext__.windowGlobal),
+  }, {
+    message: '"this" should be fake "window"',
+    test: (this === _document.__runtimeContext__.windowGlobal),
+  }, {
+    message: '"this" should be fake "window" inside IIFE',
+    test: this === (function(){ return this })(),
+  }, {
+    message: '"window" should be fake "window" inside IIFE',
+    test: window === (function(){ return window })(),
+  }
+]
+
+sandboxMessage(tests)
+
+    </script>
+  </body>
+</html>

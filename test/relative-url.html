@@ -1,0 +1,24 @@
+<html>
+  <head>
+  </head>
+  <body>
+    <script>
+
+var tests = [
+  {
+    message: 'relative url resolves correctly via anchor tag',
+    test: (resolveUrlViaAnchor('./wobbles.js') === 'https://yummyy.am/toothpaste/wobbles.js'),
+  }
+]
+
+sandboxMessage(tests)
+
+function resolveUrlViaAnchor(url) {
+  var a = document.createElement('a');
+  a.href = url;
+  return a.href;
+}
+
+    </script>
+  </body>
+</html>

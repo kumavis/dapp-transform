@@ -1,0 +1,37 @@
+<html>
+  <head>
+  </head>
+  <body>
+    <script>
+
+var tests = [
+  {
+    message: 'can get the location hash',
+    test: (window.location.hash === ""),
+  }, {
+    message: 'can set the location hash',
+    test: (window.location.hash = "bangbang"),
+  }, {
+    message: 'can get the newly set location hash',
+    test: (window.location.hash === "#bangbang"),
+  },
+  {
+    message: 'can get the location search',
+    test: (window.location.search === ""),
+  }, {
+    message: 'can set the location search',
+    test: (window.location.search = "boom"),
+  },/* {
+    message: 'can get the newly set location search',
+    test: (window.location.search === "?boom"),
+  },*/
+]
+
+console.log('hash: >'+window.location.hash+'<')
+console.log('search: >'+window.location.search+'<')
+
+sandboxMessage(tests)
+
+    </script>
+  </body>
+</html>
