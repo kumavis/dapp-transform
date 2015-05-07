@@ -23,6 +23,11 @@ var tests = [
   }, {
     message: '"window" should be fake "window" inside IIFE',
     test: window === (function(){ return window })(),
+  }, {
+    message: '"window" properties should not shadow function arguments',
+    test: (function(name, location, window){
+      return name === 5 && location === 6 && window === 7
+    })(5,6,7),
   }
 ]
 

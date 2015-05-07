@@ -40,7 +40,7 @@ test('can insert globals', function(t){
 })
 
 test('window and this', function(t){
-  t.plan(6)
+  t.plan(7)
 
   var transform = DappTransform({
     origin: 'https://yummyy.am/toothpaste/',
@@ -62,13 +62,13 @@ test('relative urls', function(t){
 })
 
 test('location', function(t){
-  t.plan(5)
+  t.plan(15)
 
   var transform = DappTransform({
-    origin: 'https://yummyy.am/toothpaste/',
+    origin: 'https://yummyy.am:9292/toothpaste/?beep%20boop#nix nax',
   })
 
-  autoTest('location-history', t, transform)
+  remoteTest('location-history', t, transform)
 
 })
 
@@ -103,6 +103,17 @@ function autoTest(testFileName, t, transform) {
 
   })
 }
+
+function remoteTest(testFileName, t, transform) {
+  setupTest(testFileName, transform, function(sandbox){
+    sandbox.on('message', function(tests){
+      tests.forEach(function(data){
+        t[data.method].apply(t, data.args)
+      })
+    })
+  })
+}
+
 
 var testFiles = {
   'basic': fs.readFileSync(__dirname+'/basic.html'),

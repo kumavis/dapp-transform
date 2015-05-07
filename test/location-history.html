@@ -4,33 +4,50 @@
   <body>
     <script>
 
-var tests = [
-  {
-    message: 'can get the location hash',
-    test: (window.location.hash === ""),
-  }, {
-    message: 'can set the location hash',
-    test: (window.location.hash = "bangbang"),
-  }, {
-    message: 'can get the newly set location hash',
-    test: (window.location.hash === "#bangbang"),
-  },
-  {
-    message: 'can get the location search',
-    test: (window.location.search === ""),
-  }, {
-    message: 'can set the location search',
-    test: (window.location.search = "boom"),
-  },/* {
-    message: 'can get the newly set location search',
-    test: (window.location.search === "?boom"),
-  },*/
-]
+// origin: 'https://yummyy.am:9292/toothpaste/?beep%20boop#nix nax',
 
-console.log('hash: >'+window.location.hash+'<')
-console.log('search: >'+window.location.search+'<')
+test(function(t){
 
-sandboxMessage(tests)
+  // globals + references
+  t.ok(window.location === location, 'window.location should match bare location')
+  t.ok(document.location === location, 'document.location should match bare location')
+  t.ok(document.location === window.location, 'document.location should match window.location')
+  
+  // get
+  t.equal(location.origin, 'https://yummyy.am:9292', 'gets the correct location origin')
+  t.equal(location.hash, '#nix nax', 'gets the correct location hash')
+  t.equal(location.search, '?beep%20boop', 'gets the correct location search')
+  t.equal(location.pathname, '/toothpaste/', 'gets the correct location pathname')
+  t.equal(location.port, '9292', 'gets the correct location port')
+  t.equal(location.hostname, 'yummyy.am', 'gets the correct location hostname')
+  t.equal(location.host, 'yummyy.am:9292', 'gets the correct location host')
+  t.equal(location.protocol, 'https:', 'gets the correct location protocol')
+  t.equal(location.href, 'https://yummyy.am:9292/toothpaste/?beep%20boop#nix%20nax', 'gets the correct location href')
+  
+  // set
+  t.ok(location.hash = 'bangbang', 'can set the location hash')
+  t.equal(location.hash, '#bangbang', 'can get the newly set location hash')
+
+})
+
+function test(testFn){
+  var tests = []
+  var t = {
+    ok: createTestForwarder('ok', tests),
+    equal: createTestForwarder('equal', tests),
+  }
+  testFn(t)
+  sandboxMessage(tests)
+}
+
+function createTestForwarder(name, tests) {
+  return function(){
+    tests.push({
+      method: name,
+      args: [].slice.call(arguments),
+    })
+  }
+}
 
     </script>
   </body>
