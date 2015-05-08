@@ -4,7 +4,7 @@ var url = require('url')
 var esquery = require('esquery')
 var esprima = require('esprima')
 var escodegen = require('escodegen')
-var escope = require('escope')
+// var escope = require('escope')
 var uniq = require('uniq')
 var streamToBuffer = require('stream-to-buffer')
 var generateEnvironment = require('./lib/env-gen.js')
@@ -109,7 +109,7 @@ function transformJs(environment, resolvedUrl, inStream, outStream) {
 
         // WRITE end of script wrapper
         var wrapperEnd = environment.wrapper[1]
-          .replace('"INSERT IMPLICIT GLOBALS HERE"', JSON.stringify(implicitGlobals))
+          // .replace('"INSERT IMPLICIT GLOBALS HERE"', JSON.stringify(implicitGlobals))
         outStream.write('\n\n;;'+wrapperEnd)
         outStream.write('\n\n})(window, document);')
 
@@ -381,6 +381,15 @@ function generateArgsVarDeclaration(fnParams){
     }],
   }
 }
+
+// function extractImplicitGlobals(ast){
+//   var scopeManager = escope.analyze(ast)
+//   var currentScope = scopeManager.acquire(ast)
+//   var topLevelVars = currentScope.variables.map(function(variable){ return variable.name })
+//   var globalVars = currentScope.implicit.variables.map(function(variable){ return variable.name })
+//   var implicitGlobals = [].concat.call(topLevelVars, globalVars)
+//   return implicitGlobals
+// }
 
 //
 // dead code border patrol

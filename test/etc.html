@@ -1,0 +1,41 @@
+<html>
+  <head>
+  </head>
+  <body>
+    <script>
+
+var x = 42
+window.y = 101
+
+test(function(t){
+
+  // implicit globals
+
+  // fails
+  // t.ok(window.x === 42, 'implicit globals accessible on windowGlobal')
+  t.ok(y === 101, 'properties set on window are in context')
+
+})
+
+function test(testFn){
+  var tests = []
+  var t = {
+    ok: createTestForwarder('ok', tests),
+    equal: createTestForwarder('equal', tests),
+  }
+  testFn(t)
+  sandboxMessage(tests)
+}
+
+function createTestForwarder(name, tests) {
+  return function(){
+    tests.push({
+      method: name,
+      args: [].slice.call(arguments),
+    })
+  }
+}
+
+    </script>
+  </body>
+</html>
