@@ -40,7 +40,7 @@ test('can insert globals', function(t){
 })
 
 test('window and this', function(t){
-  t.plan(7)
+  t.plan(11)
 
   var transform = DappTransform({
     origin: 'https://yummyy.am/toothpaste/',

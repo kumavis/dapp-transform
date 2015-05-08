@@ -16,7 +16,7 @@ var SCRIPT_CLOSE_TAG = '</'+'script'+'>'
 // -> "CallExpression:not([callee.type=MemberExpression])"
 var NAKED_CALL_AST_SELECTOR = {"type":"compound","selectors":[{"type":"identifier","value":"CallExpression"},{"type":"not","selectors":[{"type":"attribute","name":"callee.type","operator":"=","value":{"type":"literal","value":"MemberExpression"}}]}]}
 // -> ":function"
-var WITH_INJECTION_AST_SELECTOR = {"type":"class","name":"function"}
+// var WITH_INJECTION_AST_SELECTOR = {"type":"class","name":"function"}
 
 module.exports = transformHtml
 

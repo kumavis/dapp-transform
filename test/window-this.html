@@ -28,10 +28,60 @@ var tests = [
     test: (function(name, location, window){
       return name === 5 && location === 6 && window === 7
     })(5,6,7),
-  }
+  }, {
+    message: '"window" properties should not shadow function arguments when nested',
+    test: (function(name, location, window){
+      return (function(name, location, window){
+        return name === 5 && location === 6 && window === 7
+      })(name,location,window)
+    })(5,6,7),
+  },
 ]
 
-sandboxMessage(tests)
+var asyncTests = [
+  
+  function(cb){
+    setTimeout(function(){
+      cb(null, {
+        message: '"this" is fake window in setTimeout handler',
+        test: this === window,
+      })
+    })
+  },
+
+  function(cb){
+    var id = setInterval(function(){
+      clearInterval(id)
+      cb(null, {
+        message: '"this" is fake window in setInterval handler',
+        test: this === window,
+      })
+    })
+  },
+
+  function(cb){
+    window.addEventListener('message', function(){
+      cb(null, {
+        message: '"this" is fake window in window.addEventListener handler',
+        test: this === window,
+      })
+    }, false)
+    window.postMessage('dingdong', '*')
+  },
+
+]
+
+// run async tests, then submit
+var asyncTestCount = 0
+asyncTests.forEach(function(asyncTest){
+  asyncTest(function(err, result){
+    tests.push(result)
+    asyncTestCount++
+    if (asyncTestCount === asyncTests.length) {
+      sandboxMessage(tests)
+    }
+  })
+})
 
     </script>
   </body>
