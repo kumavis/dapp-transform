@@ -91,15 +91,16 @@ function transformJs(environment, resolvedUrl, inStream, outStream) {
 
       try {
 
-        // WRITE transformed src
         var ast = esprima.parse(src)
+
+        // ANALYZE src for implicit globals
+        // implicitGlobals = extractImplicitGlobals(ast)
+
+        // WRITE transformed src
         transformAstForWithInjection(ast)
         transformAstForNakedCalls(ast)
         var transformedSrc = escodegen.generate(ast)
         outStream.write(transformedSrc)
-
-        // ANALYZE src for implicit globals
-        // implicitGlobals = extractImplicitGlobals(ast)
 
       } catch(err) {
 
