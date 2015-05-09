@@ -15,8 +15,6 @@ var SCRIPT_CLOSE_TAG = '</'+'script'+'>'
 // precompiled esquery selectors
 // -> "CallExpression:not([callee.type=MemberExpression])"
 var NAKED_CALL_AST_SELECTOR = {"type":"compound","selectors":[{"type":"identifier","value":"CallExpression"},{"type":"not","selectors":[{"type":"attribute","name":"callee.type","operator":"=","value":{"type":"literal","value":"MemberExpression"}}]}]}
-// -> ":function"
-// var WITH_INJECTION_AST_SELECTOR = {"type":"class","name":"function"}
 
 module.exports = transformHtml
 
@@ -91,11 +89,9 @@ function transformJs(environment, resolvedUrl, inStream, outStream) {
 
       try {
 
-
         // TRANSFORM ast
         var ast = esprima.parse(src)
         transformAstForTopLevelVars(ast)
-        transformAstForWithInjection(ast)
         transformAstForNakedCalls(ast)
 
         // WRITE transformed src
@@ -189,164 +185,6 @@ function transformAstForNakedCalls(ast) {
 
 }
 
-function transformAstForWithInjection(ast) {
-
-  // TRANSFORM:
-  // function(a,b,c){ ... }
-
-  // INTO:
-  // function(a,b,c){
-  //   var __args__ = {a:a,b:b,c:c};
-  //   with(window){
-  //     with(__args__){ ... }
-  //   }
-  // }
-
-  // :function>BlockStatement
-
-  // BEFORE
-  //  ├─ type: FunctionExpression <---- match targets here
-  //  ├─ id
-  //  ├─ params
-  //  ├─ defaults
-  //  └─ body
-  //     ├─ type: BlockStatement
-  //     └─ body
-  //        └─ 0
-  //           ├─ type: ExpressionStatement
-  //           └─ expression
-  //              ├─ type: Literal
-  //              ├─ value: hello
-  //              └─ raw: 'hello'
-
-  // AFTER
-  // ├─ type: FunctionExpression <---- match targets here
-  // ├─ id
-  // ├─ params
-  // │  ├─ 0
-  // │  │  ├─ type: Identifier
-  // │  │  └─ name: a
-  // │  ├─ 1
-  // │  │  ├─ type: Identifier
-  // │  │  └─ name: b
-  // │  └─ 2
-  // │     ├─ type: Identifier
-  // │     └─ name: c
-  // ├─ defaults
-  // └─ body
-  //    ├─ type: BlockStatement
-  //    └─ body
-  //       ├─ 0
-  //       │  ├─ type: VariableDeclaration
-  //       │  ├─ declarations
-  //       │  │  └─ 0
-  //       │  │     ├─ type: VariableDeclarator
-  //       │  │     ├─ id
-  //       │  │     │  ├─ type: Identifier
-  //       │  │     │  └─ name: __args__
-  //       │  │     └─ init
-  //       │  │        ├─ type: ObjectExpression
-  //       │  │        └─ properties
-  //       │  │           ├─ 0
-  //       │  │           │  ├─ type: Property
-  //       │  │           │  ├─ key
-  //       │  │           │  │  ├─ type: Identifier
-  //       │  │           │  │  └─ name: a
-  //       │  │           │  ├─ computed: false
-  //       │  │           │  ├─ value
-  //       │  │           │  │  ├─ type: Identifier
-  //       │  │           │  │  └─ name: a
-  //       │  │           │  ├─ kind: init
-  //       │  │           │  ├─ method: false
-  //       │  │           │  └─ shorthand: false
-  //       │  │           ├─ 1
-  //       │  │           │  ├─ type: Property
-  //       │  │           │  ├─ key
-  //       │  │           │  │  ├─ type: Identifier
-  //       │  │           │  │  └─ name: b
-  //       │  │           │  ├─ computed: false
-  //       │  │           │  ├─ value
-  //       │  │           │  │  ├─ type: Identifier
-  //       │  │           │  │  └─ name: b
-  //       │  │           │  ├─ kind: init
-  //       │  │           │  ├─ method: false
-  //       │  │           │  └─ shorthand: false
-  //       │  │           └─ 2
-  //       │  │              ├─ type: Property
-  //       │  │              ├─ key
-  //       │  │              │  ├─ type: Identifier
-  //       │  │              │  └─ name: c
-  //       │  │              ├─ computed: false
-  //       │  │              ├─ value
-  //       │  │              │  ├─ type: Identifier
-  //       │  │              │  └─ name: c
-  //       │  │              ├─ kind: init
-  //       │  │              ├─ method: false
-  //       │  │              └─ shorthand: false
-  //       │  └─ kind: var
-  //       └─ 1
-  //          ├─ type: WithStatement
-  //          ├─ object
-  //          │  ├─ type: Identifier
-  //          │  └─ name: window
-  //          └─ body
-  //             ├─ type: BlockStatement
-  //             └─ body
-  //                └─ 0
-  //                   ├─ type: WithStatement
-  //                   ├─ object
-  //                   │  ├─ type: Identifier
-  //                   │  └─ name: __args__
-  //                   └─ body
-  //                      ├─ type: BlockStatement
-  //                      └─ body
-  //                         └─ 0
-  //                            ├─ type: ExpressionStatement
-  //                            └─ expression
-  //                               ├─ type: Literal
-  //                               ├─ value: hello
-  //                               └─ raw: 'hello'           
-
-
-  // all 'function expressions/declarations' need a double 'with'
-  // one for injecting 'windowGlobal' properties into context,
-  // one for re-injecting function arguments so they don't get trampled by 'windowGlobal' properties
-
-  // var matches = esquery.match(ast, WITH_INJECTION_AST_SELECTOR)
-  // uniq(matches)
-  // for (var i=0, l=matches.length; i<l; i++) {
-  //   var match = matches[i]
-  //   var originalBody = match.body.body
-  //   match.body.body = [
-  //     generateArgsVarDeclaration(match.params),
-  //     generateWithStatement('window', [
-  //       generateWithStatement('__args__',
-  //         originalBody
-  //       )
-  //     ]),
-  //   ]
-  // }
-
-  // the 'program' needs a single 'with' for injecting 'windowGlobal' properties into context
-
-  var originalBody = ast.body
-  ast.body = [generateWithStatement('window', originalBody)]
-
-}
-
-function generateWithStatement(indentifier, body){
-  return {
-    type: 'WithStatement',
-    object: {
-      type: 'Identifier',
-      name: indentifier,
-    },
-    body: {
-      type: 'BlockStatement',
-      body: body,
-    },
-  }
-}
 
 function generateArgsVarDeclaration(fnParams){
   return {
