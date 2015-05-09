@@ -78,7 +78,6 @@ function transformHtml(opts) {
 
 function transformJs(environment, resolvedUrl, inStream, outStream) {
     // WRITE start of script wrapper
-    outStream.write(';(function(_window, _document){\n\n')
     outStream.write(environment.wrapper[0])
 
     // WAIT for script to load
@@ -105,7 +104,6 @@ function transformJs(environment, resolvedUrl, inStream, outStream) {
 
         // WRITE end of script wrapper
         outStream.write('\n\n'+environment.wrapper[1])
-        outStream.write('\n\n})(window, document);')
 
         // END
         outStream.end()
