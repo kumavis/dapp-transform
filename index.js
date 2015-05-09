@@ -240,11 +240,11 @@ function transformDeclarationToAssignment(def) {
 
   target.type = 'ExpressionStatement'
   target.expression = {
-   type: 'AssignmentExpression',
-   operator: '=',
-   left: identifier,
-   right: init,
- }
+    type: 'AssignmentExpression',
+    operator: '=',
+    left: identifier,
+    right: init,
+  }
 
  delete target.kind
  delete target.declarations

@@ -8,6 +8,10 @@
 
 test(function(t){
 
+  //
+  // location
+  //
+
   // globals + references
   t.ok(window.location === location, 'window.location should match bare location')
   t.ok(document.location === location, 'document.location should match bare location')
@@ -27,6 +31,55 @@ test(function(t){
   // set
   t.ok(location.hash = 'bangbang', 'can set the location hash')
   t.equal(location.hash, '#bangbang', 'can get the newly set location hash')
+
+  //
+  // history
+  //
+
+  // globals + references
+  t.ok(window.history === history, 'window.history should match bare history')
+
+  // state
+  var stateObjectA = {value: 'a'}
+  var stateObjectB = {value: 'b'}
+  var stateObjectC = {value: 'c'}
+
+  t.ok(history.state === null, 'history.state should start as null')
+  history.state = 42
+  t.ok(history.state === null, 'history.state should not be writable')
+
+  history.pushState(stateObjectA, 'A', '#a')
+  t.ok(history.state === stateObjectA, 'history.state should have the given state obj after "pushState"')
+  t.equal(location.hash, '#a', 'location should be updated after "pushState"')
+  
+  history.replaceState(stateObjectB, 'B', '#b')
+  t.ok(history.state === stateObjectB, 'history.state should have the state obj after "replaceState"')
+  t.equal(location.hash, '#b', 'location should be updated after "replaceState"')
+
+  history.pushState(stateObjectC, 'C', '#c')
+  t.ok(history.state === stateObjectC, 'history.state should have the state obj after "pushState"')
+  t.equal(location.hash, '#c', 'location should be updated after "pushState"')
+  
+  history.back()
+  t.ok(history.state === stateObjectB, 'history.state should have the state obj after "back"')
+  t.equal(location.hash, '#b', 'location should be updated after "back"')
+
+  history.forward()
+  t.ok(history.state === stateObjectC, 'history.state should have the same state obj after "forward"')
+  t.equal(location.hash, '#c', 'location should be updated after "forward"')
+
+  history.back()
+  history.back()
+  history.replaceState(stateObjectA, 'A', '#a')
+  t.ok(history.state === stateObjectA, 'history.state should have the state obj after "replaceState"')
+  t.equal(location.hash, '#a', 'location should be updated after "replaceState"')
+
+  history.pushState(stateObjectB, 'B', '#b')
+  t.ok(history.state === stateObjectB, 'history.state should have the given state obj after "pushState"')
+  t.equal(location.hash, '#b', 'location should be updated after "pushState"')
+  history.forward()
+  t.ok(history.state === stateObjectB, 'history.state should not have the same state obj after "forward" at the top of the stack')
+  t.equal(location.hash, '#b', 'location should not be updated after "forward" at the top of the stack')
 
 })
 

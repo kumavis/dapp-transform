@@ -62,7 +62,7 @@ test('relative urls', function(t){
 })
 
 test('location', function(t){
-  t.plan(15)
+  t.plan(33)
 
   var transform = DappTransform({
     origin: 'https://yummyy.am:9292/toothpaste/?beep%20boop#nix nax',
