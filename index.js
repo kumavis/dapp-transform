@@ -80,7 +80,6 @@ function transformJs(environment, resolvedUrl, inStream, outStream) {
     // WRITE start of script wrapper
     outStream.write(';(function(_window, _document){\n\n')
     outStream.write(environment.wrapper[0])
-    outStream.write('\n;;\n\n')
 
     // WAIT for script to load
     streamToBuffer(inStream, function(err, result){
@@ -105,8 +104,7 @@ function transformJs(environment, resolvedUrl, inStream, outStream) {
       } finally {
 
         // WRITE end of script wrapper
-        var wrapperEnd = environment.wrapper[1]
-        outStream.write('\n\n;;'+wrapperEnd)
+        outStream.write('\n\n'+environment.wrapper[1])
         outStream.write('\n\n})(window, document);')
 
         // END
