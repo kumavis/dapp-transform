@@ -4,7 +4,7 @@ var url = require('url')
 var esquery = require('esquery')
 var esprima = require('esprima')
 var escodegen = require('escodegen')
-// var escope = require('escope')
+var escope = require('escope')
 var uniq = require('uniq')
 var streamToBuffer = require('stream-to-buffer')
 var generateEnvironment = require('./lib/env-gen.js')
@@ -91,14 +91,14 @@ function transformJs(environment, resolvedUrl, inStream, outStream) {
 
       try {
 
+
+        // TRANSFORM ast
         var ast = esprima.parse(src)
-
-        // ANALYZE src for implicit globals
-        // implicitGlobals = extractImplicitGlobals(ast)
-
-        // WRITE transformed src
+        transformAstForTopLevelVars(ast)
         transformAstForWithInjection(ast)
         transformAstForNakedCalls(ast)
+
+        // WRITE transformed src
         var transformedSrc = escodegen.generate(ast)
         outStream.write(transformedSrc)
 
@@ -110,7 +110,6 @@ function transformJs(environment, resolvedUrl, inStream, outStream) {
 
         // WRITE end of script wrapper
         var wrapperEnd = environment.wrapper[1]
-          // .replace('"INSERT IMPLICIT GLOBALS HERE"', JSON.stringify(implicitGlobals))
         outStream.write('\n\n;;'+wrapperEnd)
         outStream.write('\n\n})(window, document);')
 
@@ -383,14 +382,35 @@ function generateArgsVarDeclaration(fnParams){
   }
 }
 
-// function extractImplicitGlobals(ast){
-//   var scopeManager = escope.analyze(ast)
-//   var currentScope = scopeManager.acquire(ast)
-//   var topLevelVars = currentScope.variables.map(function(variable){ return variable.name })
-//   var globalVars = currentScope.implicit.variables.map(function(variable){ return variable.name })
-//   var implicitGlobals = [].concat.call(topLevelVars, globalVars)
-//   return implicitGlobals
-// }
+function transformAstForTopLevelVars(ast){
+  var scopeManager = escope.analyze(ast)
+  var currentScope = scopeManager.acquire(ast)
+
+  // transform top level var declarations to implicit globals
+  currentScope.variables.forEach(function(variable){
+    variable.defs.forEach(transformDeclarationToAssignment)
+  })
+}
+
+// transforms declaration nodes in place
+function transformDeclarationToAssignment(def) {
+  if (def.node.type !== 'VariableDeclarator') return
+
+  var target = def.parent
+  var identifier = def.node.id
+  var init = def.node.init
+
+  target.type = 'ExpressionStatement'
+  target.expression = {
+   type: 'AssignmentExpression',
+   operator: '=',
+   left: identifier,
+   right: init,
+ }
+
+ delete target.kind
+ delete target.declarations
+}
 
 //
 // dead code border patrol

@@ -73,7 +73,7 @@ test('location', function(t){
 })
 
 test('etc', function(t){
-  t.plan(1)
+  t.plan(2)
 
   var transform = DappTransform({
     origin: 'https://yummyy.am/toothpaste/',
@@ -88,7 +88,7 @@ test('etc', function(t){
 function setupTest(testFileName, transform, cb) {
   iframeSandbox({
     container: document.body,
-    src: 'http://frame.vapor.to/',
+    // src: 'http://frame.vapor.to/',
   }, function(err, sandbox){
 
     var inputStream = fetchTestStream(testFileName)

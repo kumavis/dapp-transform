@@ -10,9 +10,7 @@ window.y = 101
 test(function(t){
 
   // implicit globals
-
-  // fails
-  // t.ok(window.x === 42, 'implicit globals accessible on windowGlobal')
+  t.ok(window.x === 42, 'implicit globals accessible on windowGlobal')
   t.ok(y === 101, 'properties set on window are in context')
 
 })
