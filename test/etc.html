@@ -4,14 +4,27 @@
   <body>
     <script>
 
+var z = 16
+window.w = 999
+function topLevelFunction(){}
+
+    </script>
+    <script>
+
 var x = 42
 window.y = 101
 
 test(function(t){
 
   // implicit globals
-  t.ok(window.x === 42, 'implicit globals accessible on windowGlobal')
-  t.ok(y === 101, 'properties set on window are in context')
+  t.equal(window.x, 42, 'implicit globals accessible on windowGlobal')
+  t.equal(y, 101, 'properties set on window are in scope')
+
+  // across source tags
+  t.equal(window.z, 16, 'implicit globals accessible on windowGlobal across source tags')
+  t.equal(w, 999, 'properties set on window are in scope across source tags')
+  t.equal(typeof window.topLevelFunction, 'function', 'top-level functions are accessible on windowGlobal across source tags')
+  t.equal(typeof topLevelFunction, 'function', 'top-level functions are in scope across source tags')
 
 })
 

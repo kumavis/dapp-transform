@@ -217,19 +217,61 @@ function generateArgsVarDeclaration(fnParams){
 }
 
 function transformAstForTopLevelVars(ast){
+  var topLevelFunctions = []
+
   var scopeManager = escope.analyze(ast)
   var currentScope = scopeManager.acquire(ast)
 
   // transform top level var declarations to implicit globals
   currentScope.variables.forEach(function(variable){
-    variable.defs.forEach(transformDeclarationToAssignment)
+    variable.defs.forEach(function(def){
+
+      switch(def.node.type) {
+    
+        case 'VariableDeclarator':
+          transformVarDeclarationToAssignment(def)
+          break
+
+        case 'FunctionDeclaration':
+          topLevelFunctions.push(def.node.id)
+          break
+
+      }
+
+    })
   })
+
+  // append top level functions to global
+  topLevelFunctions.forEach(function(id){
+    var node = implicitGlobalFnAssignment(id)
+    ast.body.unshift(node)
+  })
+
 }
 
-// transforms declaration nodes in place
-function transformDeclarationToAssignment(def) {
-  if (def.node.type !== 'VariableDeclarator') return
+// creates an ast node for window.`id` = `id`
+function implicitGlobalFnAssignment(id){
+  return {
+    type: 'ExpressionStatement',
+    expression: {
+      type: 'AssignmentExpression',
+      operator: '=',
+      left: {
+        type: 'MemberExpression',
+        computed: false,
+        object: {
+          type: 'Identifier',
+          name: 'window',
+        },
+        property: id,
+      },
+      right: id,
+    },
+  }
+}
 
+// transforms var declaration nodes in place
+function transformVarDeclarationToAssignment(def) {
   var target = def.parent
   var identifier = def.node.id
   var init = def.node.init
@@ -242,9 +284,10 @@ function transformDeclarationToAssignment(def) {
     right: init,
   }
 
- delete target.kind
- delete target.declarations
+  delete target.kind
+  delete target.declarations
 }
+
 
 //
 // dead code border patrol
