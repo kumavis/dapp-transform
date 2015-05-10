@@ -73,13 +73,24 @@ test('location', function(t){
 })
 
 test('etc', function(t){
-  t.plan(2)
+  t.plan(6)
 
   var transform = DappTransform({
     origin: 'https://yummyy.am/toothpaste/',
   })
 
   remoteTest('etc', t, transform)
+
+})
+
+test('dom-events', function(t){
+  t.plan(2)
+
+  var transform = DappTransform({
+    origin: 'https://yummyy.am/toothpaste/',
+  })
+
+  remoteTest('dom-events', t, transform)
 
 })
 
@@ -133,6 +144,7 @@ var testFiles = {
   'relative-url': fs.readFileSync(__dirname+'/relative-url.html'),
   'location-history': fs.readFileSync(__dirname+'/location-history.html'),
   'etc': fs.readFileSync(__dirname+'/etc.html'),
+  'dom-events': fs.readFileSync(__dirname+'/dom-events.html'),
 }
 
 function fetchTestStream(name) {

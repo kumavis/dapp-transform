@@ -1,0 +1,40 @@
+<html>
+  <head>
+  </head>
+  <body onload="eventTest()">
+    <script>
+
+function eventTest(){
+
+  test(function(t){
+
+    // implicit globals
+    t.ok(true, 'dom element event handlers are called')
+    t.ok(window === this, 'dom element event handlers this is fake window')
+
+  })
+
+}
+
+function test(testFn){
+  var tests = []
+  var t = {
+    ok: createTestForwarder('ok', tests),
+    equal: createTestForwarder('equal', tests),
+  }
+  testFn(t)
+  sandboxMessage(tests)
+}
+
+function createTestForwarder(name, tests) {
+  return function(){
+    tests.push({
+      method: name,
+      args: [].slice.call(arguments),
+    })
+  }
+}
+
+    </script>
+  </body>
+</html>

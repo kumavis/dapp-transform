@@ -57,8 +57,110 @@ function transformHtml(opts) {
       inStream = node.createReadStream()
     }
     var outStream = node.createWriteStream()
-    transformJs(environment, resolvedUrl, inStream, outStream)
+    jsTransformStream(environment, resolvedUrl, inStream, outStream)
   })
+
+  // Mouse Events
+  transformEventHandler('onclick')
+  transformEventHandler('oncontextmenu')
+  transformEventHandler('ondblclick')
+  transformEventHandler('onmousedown')
+  transformEventHandler('onmouseenter')
+  transformEventHandler('onmouseleave')
+  transformEventHandler('onmousemove')
+  transformEventHandler('onmouseover')
+  transformEventHandler('onmouseout')
+  transformEventHandler('onmouseup')
+  // Keyboard Events
+  transformEventHandler('onkeydown')
+  transformEventHandler('onkeypress')
+  transformEventHandler('onkeyup')
+  // Frame/Object Events
+  transformEventHandler('onabort')
+  transformEventHandler('onbeforeunload')
+  transformEventHandler('onerror')
+  transformEventHandler('onhashchange')
+  transformEventHandler('onload')
+  transformEventHandler('onpageshow')
+  transformEventHandler('onpagehide')
+  transformEventHandler('onresize')
+  transformEventHandler('onscroll')
+  transformEventHandler('onunload')
+  // Form Events
+  transformEventHandler('onblur')
+  transformEventHandler('onchange')
+  transformEventHandler('onfocus')
+  transformEventHandler('onfocusin')
+  transformEventHandler('onfocusout')
+  transformEventHandler('oninput')
+  transformEventHandler('oninvalid')
+  transformEventHandler('onreset')
+  transformEventHandler('onsearch')
+  transformEventHandler('onselect')
+  transformEventHandler('onsubmit')
+  // Drag Events
+  transformEventHandler('ondrag')
+  transformEventHandler('ondragend')
+  transformEventHandler('ondragenter')
+  transformEventHandler('ondragleave')
+  transformEventHandler('ondragover')
+  transformEventHandler('ondragstart')
+  transformEventHandler('ondrop')
+  // Clipboard Events
+  transformEventHandler('oncopy')
+  transformEventHandler('oncut')
+  transformEventHandler('onpaste')
+  // Print Events
+  transformEventHandler('onafterprint')
+  transformEventHandler('onbeforeprint')
+  // Media Events
+  transformEventHandler('onabort')
+  transformEventHandler('oncanplay')
+  transformEventHandler('oncanplaythrough')
+  transformEventHandler('ondurationchange')
+  transformEventHandler('onemptied')
+  transformEventHandler('onended')
+  transformEventHandler('onerror')
+  transformEventHandler('onloadeddata')
+  transformEventHandler('onloadedmetadata')
+  transformEventHandler('onloadstart')
+  transformEventHandler('onpause')
+  transformEventHandler('onplay')
+  transformEventHandler('onplaying')
+  transformEventHandler('onprogress')
+  transformEventHandler('onratechange')
+  transformEventHandler('onseeked')
+  transformEventHandler('onseeking')
+  transformEventHandler('onstalled')
+  transformEventHandler('onsuspend')
+  transformEventHandler('ontimeupdate')
+  transformEventHandler('onvolumechange')
+  transformEventHandler('onwaiting')
+  // Animation Events
+  transformEventHandler('animationend')
+  transformEventHandler('animationiteration')
+  transformEventHandler('animationstart')
+  // Transition Events
+  transformEventHandler('transitionend')
+  // Server-Sent Events
+  transformEventHandler('onerror')
+  transformEventHandler('onmessage')
+  transformEventHandler('onopen')
+  // Misc Events
+  transformEventHandler('onmessage')
+  transformEventHandler('onmousewheel')
+  transformEventHandler('ononline')
+  transformEventHandler('onoffline')
+  transformEventHandler('onpopstate')
+  transformEventHandler('onshow')
+  transformEventHandler('onstorage')
+  transformEventHandler('ontoggle')
+  transformEventHandler('onwheel')
+  // Touch Events
+  transformEventHandler('ontouchcancel')
+  transformEventHandler('ontouchend')
+  transformEventHandler('ontouchmove')
+  transformEventHandler('ontouchstart')
 
   // trumpet.selectAll('link', function (script) {
   //   var srcUrl = script.getAttribute('href')
@@ -71,50 +173,52 @@ function transformHtml(opts) {
   //   }
   // })
 
+  function transformEventHandler(event){
+    trumpet.selectAll('['+event+']', function (node) {
+      var src = node.getAttribute(event)
+      var newSrc = transformJs(src, environment)
+      node.setAttribute(event, newSrc)
+    })
+  }
+
   return trumpet
 }
 
 // utils
 
-function transformJs(environment, resolvedUrl, inStream, outStream) {
-    // WRITE start of script wrapper
-    outStream.write(environment.wrapper[0])
+function jsTransformStream(environment, resolvedUrl, inStream, outStream) {
+  // WAIT for script to load
+  streamToBuffer(inStream, function(err, result){
+    var src = result.toString()
 
-    // WAIT for script to load
-    streamToBuffer(inStream, function(err, result){
-      var src = result.toString()
-      var implicitGlobals = []
+    try {
+      var transformedSrc = transformJs(src, environment)
+      outStream.write(transformedSrc)
+    } catch(err) {
+      console.error('Script transform failed ('+resolvedUrl+'):', err)
+    } finally {
+      // END
+      outStream.end()
+    }
+    
+  })
 
-      try {
+  outStream.on('error', function(err){ throw err })
+  inStream.on('error', function(err){ throw err })
+}
 
-        // TRANSFORM ast
-        var ast = esprima.parse(src)
-        transformAstForTopLevelVars(ast)
-        transformAstForNakedCalls(ast)
+function transformJs(src, environment) {
+  // TRANSFORM ast
+  var ast = esprima.parse(src)
+  transformAstForTopLevelVars(ast)
+  transformAstForNakedCalls(ast)
+  // GENERATE new src
+  var transformedSrc = ''
+  transformedSrc += environment.wrapper[0]
+  transformedSrc += escodegen.generate(ast)
+  transformedSrc += environment.wrapper[1]
 
-        // WRITE transformed src
-        var transformedSrc = escodegen.generate(ast)
-        outStream.write(transformedSrc)
-
-      } catch(err) {
-
-        console.error('Script transform failed ('+resolvedUrl+'):', err)
-
-      } finally {
-
-        // WRITE end of script wrapper
-        outStream.write('\n\n'+environment.wrapper[1])
-
-        // END
-        outStream.end()
-
-      }
-      
-    })
-
-    outStream.on('error', function(err){ throw err })
-    inStream.on('error', function(err){ throw err })
-
+  return transformedSrc
 }
 
 function normalizeUrl(srcUrl, origin) {
