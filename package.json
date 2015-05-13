@@ -14,7 +14,12 @@
       "brfs"
     ]
   },
+  "browser": {
+    "browserify": false
+  },
   "dependencies": {
+    "async": "^0.9.0",
+    "duplexify": "^3.3.0",
     "escodegen": "^1.6.1",
     "escope": "^1.0.3",
     "esprima": "^2.2.0",
