@@ -25,6 +25,7 @@
     "escope": "^1.0.3",
     "esprima": "^2.2.0",
     "esquery": "git://github.com/estools/esquery.git#cde1a0a53ffbd6775122cdfc04ca74508387a5c7",
+    "ethereumjs-util": "^0.1.0",
     "meowserify": "^1.0.1",
     "request": "^2.55.0",
     "stream-to-buffer": "^0.1.0",

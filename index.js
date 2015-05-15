@@ -31,8 +31,8 @@ function DappTransform(opts) {
     if (err) return duplexStream.emit('error', err)
     // initialize
     environment = result
-    duplexStream.setWritable(trumpet)
     duplexStream.setReadable(trumpet)
+    duplexStream.setWritable(trumpet)
   })
 
   // configure transformations
@@ -59,7 +59,7 @@ function DappTransform(opts) {
     if (srcUrl) {
       node.removeAttribute('src')
       resolvedUrl = normalizeUrl(srcUrl, location)
-      inStream = request(destUrl)
+      inStream = request(resolvedUrl)
     } else {
       resolvedUrl = normalizeUrl('./', location)
       inStream = node.createReadStream()
