@@ -24,7 +24,7 @@
     "escodegen": "^1.6.1",
     "escope": "^1.0.3",
     "esprima": "^2.2.0",
-    "esquery": "git://github.com/estools/esquery.git#322aad8716db300bbf4dfa9827f1a546ce362ba4",
+    "esquery": "^0.4.0",
     "ethereumjs-util": "^0.1.0",
     "meowserify": "^1.0.1",
     "request": "^2.55.0",
