@@ -2,6 +2,8 @@ var Trumpet = require('trumpet')
 var request = require('request')
 var url = require('url')
 var Duplexify = require('duplexify')
+var through2 = require('through2')
+var URLRewriteStream = require('cssurl').URLRewriteStream
 var generateEnvironment = require('./lib/env-gen.js')
 var transformJs = require('./lib/transform-js.js').transformJs
 var jsTransformStream = require('./lib/transform-js.js').jsTransformStream
@@ -18,8 +20,9 @@ function DappTransform(opts) {
 
   // parse options
 
-  var origin = opts.origin
-  var location = url.parse(origin)
+  var originUrl = opts.origin
+  var origin = url.parse(originUrl)
+  var resolveToOrigin = normalizeUrl.bind(null, origin)
   var environment = undefined
 
   // initialize + setup data flow
@@ -41,7 +44,7 @@ function DappTransform(opts) {
     var readStream = node.createReadStream()
     var writeStream = node.createWriteStream()
     // WRITE base tag
-    var baseTag = '<base href="'+origin+'" target="_blank">'
+    var baseTag = '<base href="'+originUrl+'" target="_blank">'
     writeStream.write(baseTag)
     // WRITE environment init script
     writeStream.write(SCRIPT_OPEN_TAG)
@@ -58,14 +61,54 @@ function DappTransform(opts) {
     // remote or inline script
     if (srcUrl) {
       node.removeAttribute('src')
-      resolvedUrl = normalizeUrl(srcUrl, location)
+      resolvedUrl = resolveToOrigin(srcUrl)
       inStream = request(resolvedUrl)
     } else {
-      resolvedUrl = normalizeUrl('./', location)
+      resolvedUrl = resolveToOrigin('./')
       inStream = node.createReadStream()
     }
     var outStream = node.createWriteStream()
     jsTransformStream(environment, resolvedUrl, inStream, outStream)
+  })
+
+  trumpet.selectAll('style', function (node) {
+    var resolvedUrl = resolveToOrigin('./')
+    var inStream = node.createReadStream()
+    var outStream = node.createWriteStream()
+    var cssTransform = new URLRewriteStream(function (srcUrl) {
+      var resolved = resolveToOrigin(srcUrl)
+      var proxied = proxyUrl('https://proxy.vapor.to/', resolved)
+      return proxied
+    })
+    
+    inStream
+    .pipe(cssTransform)
+    .pipe(outStream)
+  })
+
+  trumpet.selectAll('link[href]', function (node) {
+    var srcUrl = node.getAttribute('href')
+    node.removeAttribute('href')
+    var resolvedUrl = resolveToOrigin(srcUrl)
+    var inStream = request(resolvedUrl)
+    // overwrite entire node
+    var outStream = node.createWriteStream({outer: true})
+    var endTag = through2({}, null, function(cb){
+      this.push('</'+'style>')
+      cb()
+    })
+    outStream.write('<'+'style>')
+    // rewrite urls to resolved, proxied urls
+    var cssTransform = new URLRewriteStream(function (srcUrl) {
+      var resolved = resolveToOrigin(srcUrl)
+      var proxied = proxyUrl('https://proxy.vapor.to/', resolved)
+      return proxied
+    })
+    
+    inStream
+    .pipe(cssTransform)
+    .pipe(endTag)
+    .pipe(outStream)
   })
 
   DOM_EVENT_NAMES.forEach(function transformEventHandler(eventName){
@@ -82,15 +125,23 @@ function DappTransform(opts) {
 
 // utils
 
-function normalizeUrl(srcUrl, origin) {
+function normalizeUrl(origin, srcUrl) {
   var pathname = origin.pathname
 
   if (pathname.slice(-1) !== '/') pathname += '/'
   var relPath = url.resolve(origin.protocol+'//'+origin.host, pathname)
-  // console.log(origin.host, pathname, '=>', relPath)
   var result = url.resolve(relPath, srcUrl)
-  // console.log(relPath, srcUrl, '=>', result)
+  // console.log('URL RESOLVE:', srcUrl, '=>', result)
   return result
+}
+
+function proxyUrl(proxy, target) {
+  // whitelist
+  if (-1 !== target.indexOf('localhost:3000')) {
+    return target
+  } else {
+    return proxy + encodeURIComponent(target)
+  }
 }
 
 function noop(){}
