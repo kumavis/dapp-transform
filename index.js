@@ -3,6 +3,7 @@ var request = require('request')
 var url = require('url')
 var Duplexify = require('duplexify')
 var through2 = require('through2')
+var streams2ify = require('streams2')
 var URLRewriteStream = require('cssurl').URLRewriteStream
 var generateEnvironment = require('./lib/env-gen.js')
 var transformJs = require('./lib/transform-js.js').transformJs
@@ -34,7 +35,7 @@ function DappTransform(opts) {
     if (err) return duplexStream.emit('error', err)
     // initialize
     environment = result
-    duplexStream.setReadable(trumpet)
+    duplexStream.setReadable(streams2ify(trumpet))
     duplexStream.setWritable(trumpet)
   })
 

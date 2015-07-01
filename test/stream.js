@@ -2,6 +2,7 @@ var test = require('tape')
 var eos = require('end-of-stream')
 var from = require('from')
 var DappTransform = require('../index.js')
+process.stdout = process.stdout || browserout()
 
 test(function(t){
 
@@ -13,21 +14,27 @@ test(function(t){
 
   var output = ''
   transform.on('data', function(data){
-    console.log('data')
     output += data.toString()
   })
 
-  eos(transform, function(){
-    console.log('end', output)
+  transform.on('error', function(err){
+    t.fail(err)
+  })
+
+  eos(transform, function(err){
+    console.log('end', err, output)
     t.ok(output.length > 0)
   })
 
-  from([
+  var inStream = from([
     '<html>',
     '<head></head>',
     '</html>',
   ])
+  
+  inStream
   .pipe(transform)
+  // .pipe(process.stdout)
 
 })
   
