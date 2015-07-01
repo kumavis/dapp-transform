@@ -73,7 +73,7 @@ test('location', function(t){
 })
 
 test('etc', function(t){
-  t.plan(6)
+  t.plan(7)
 
   var transform = DappTransform({
     origin: 'https://yummyy.am/toothpaste/',

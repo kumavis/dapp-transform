@@ -26,6 +26,15 @@ test(function(t){
   t.equal(typeof window.topLevelFunction, 'function', 'top-level functions are accessible on windowGlobal across source tags')
   t.equal(typeof topLevelFunction, 'function', 'top-level functions are in scope across source tags')
 
+  // documentElement
+  var didFail = false
+  try {
+    var el = document.documentElement
+  } catch (_) {
+    didFail = true
+  }
+  t.equal(didFail, false, 'can lookup document.documentElement without issue')
+
 })
 
 function test(testFn){
