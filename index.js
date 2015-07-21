@@ -10,8 +10,11 @@ var transformJs = require('./lib/transform-js.js').transformJs
 var jsTransformStream = require('./lib/transform-js.js').jsTransformStream
 var DOM_EVENT_NAMES = require('./lib/dom-events.js')
 
+var proxyServiceUrl = process.env.PROXY_URL
 var SCRIPT_OPEN_TAG = '<'+'script'+'>'
 var SCRIPT_CLOSE_TAG = '</'+'script'+'>'
+var STYLE_OPEN_TAG = '<'+'style'+'>'
+var STYLE_CLOSE_TAG = '</'+'style'+'>'
 
 module.exports = DappTransform
 
@@ -78,7 +81,7 @@ function DappTransform(opts) {
     var outStream = node.createWriteStream()
     var cssTransform = new URLRewriteStream(function (srcUrl) {
       var resolved = resolveToOrigin(srcUrl)
-      var proxied = proxyUrl('https://proxy.vapor.to/', resolved)
+      var proxied = proxyUrl(proxyServiceUrl, resolved)
       return proxied
     })
     
@@ -94,15 +97,15 @@ function DappTransform(opts) {
     var inStream = request(resolvedUrl)
     // overwrite entire node
     var outStream = node.createWriteStream({outer: true})
+    outStream.write(STYLE_OPEN_TAG)
     var endTag = through2({}, null, function(cb){
-      this.push('</'+'style>')
+      this.push(STYLE_CLOSE_TAG)
       cb()
     })
-    outStream.write('<'+'style>')
     // rewrite urls to resolved, proxied urls
     var cssTransform = new URLRewriteStream(function (srcUrl) {
       var resolved = resolveToOrigin(srcUrl)
-      var proxied = proxyUrl('https://proxy.vapor.to/', resolved)
+      var proxied = proxyUrl(proxyServiceUrl, resolved)
       return proxied
     })
     
@@ -141,7 +144,7 @@ function proxyUrl(proxy, target) {
   if (-1 !== target.indexOf('localhost:3000')) {
     return target
   } else {
-    return proxy + encodeURIComponent(target)
+    return proxy + '/' + encodeURIComponent(target)
   }
 }
 
