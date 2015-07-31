@@ -81,7 +81,7 @@ function DappTransform(opts) {
     var outStream = node.createWriteStream()
     var cssTransform = new URLRewriteStream(function (srcUrl) {
       var resolved = resolveToOrigin(srcUrl)
-      var proxied = proxyUrl(proxyServiceUrl, resolved)
+      var proxied = proxyUrl(resolved)
       return proxied
     })
     
@@ -105,7 +105,7 @@ function DappTransform(opts) {
     // rewrite urls to resolved, proxied urls
     var cssTransform = new URLRewriteStream(function (srcUrl) {
       var resolved = resolveToOrigin(srcUrl)
-      var proxied = proxyUrl(proxyServiceUrl, resolved)
+      var proxied = proxyUrl(resolved)
       return proxied
     })
     
@@ -139,12 +139,12 @@ function normalizeUrl(origin, srcUrl) {
   return result
 }
 
-function proxyUrl(proxy, target) {
+function proxyUrl(target) {
   // whitelist
   if (-1 !== target.indexOf('localhost:3000')) {
     return target
   } else {
-    return proxy + '/' + encodeURIComponent(target)
+    return proxyServiceUrl + '/' + target
   }
 }
 
