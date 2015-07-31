@@ -47,9 +47,6 @@ function DappTransform(opts) {
   trumpet.selectAll('head', function (node) {
     var readStream = node.createReadStream()
     var writeStream = node.createWriteStream()
-    // WRITE base tag
-    var baseTag = '<base href="'+originUrl+'" target="_blank">'
-    writeStream.write(baseTag)
     // WRITE environment init script
     writeStream.write(SCRIPT_OPEN_TAG)
     writeStream.write(environment.init)
