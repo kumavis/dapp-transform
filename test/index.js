@@ -26,7 +26,7 @@ test('can insert globals', function(t){
 
   var transform = DappTransform({
     origin: 'https://yummyy.am/toothpaste/',
-    shadowWindow: {
+    externalGlobals: {
       assert: 'sandboxMessage',
     }
   })
