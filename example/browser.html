@@ -6,8 +6,8 @@
     type="text"
     onchange="updateIframe(this.value)"
     style="width:100%;"
-    placeholder="http://ethereum.org/"
-    value="http://ethereum.org/"
+    placeholder="https://ethereum.org/"
+    value="https://ethereum.org/"
   >
   <br>
   <!-- web page -->
@@ -16,7 +16,7 @@
   ></iframe>
   <!-- connect url bar and iframe -->
   <script type="text/javascript">
-    updateIframe('http://ethereum.org/')
+    updateIframe('https://ethereum.org/')
     function updateIframe(targetUrl){
       var iframe = document.getElementsByTagName('iframe')[0]
       var transformUrl = 'http://localhost:9000/html/'+encodeURIComponent(targetUrl)

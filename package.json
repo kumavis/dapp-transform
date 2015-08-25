@@ -6,7 +6,8 @@
   "private": true,
   "scripts": {
     "test": "node test/stream.js && beefy test/index.js --open --live",
-    "start": "TRANSFORM_BASE_URL='http://localhost:9000/' PROXY_URL='https://proxy.metamask.io/' node server.js"
+    "dev": "open example/browser.html && TRANSFORM_BASE_URL='http://localhost:9000/' PROXY_URL='https://proxy.metamask.io/' node server.js",
+    "start": "node server.js"
   },
   "author": "",
   "license": "ISC",
