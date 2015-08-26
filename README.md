@@ -15,3 +15,20 @@ modified script tag:
 
 wrapper + AST transformations ensure all references to 'window' or 'document'
 actually reference the 'fakeWindow' and 'fakeDocument' created in the initialization
+
+
+# DOM notes
+
+### navigation and routing
+
+app routing happens in a number of ways.
+
+html anchors are used to nagivate to:
+  * same page navigation (via a named anchor)
+  * a relative location
+  * an external location
+  
+js navigation can work in a number of ways:
+  * update window.location
+  * history api
+  * internal state change

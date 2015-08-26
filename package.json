@@ -42,14 +42,17 @@
     "xtend": "4.0.0"
   },
   "devDependencies": {
-    "async": "^0.9.0",
+    "browser-run": "git://github.com/kumavis/browser-run.git#92b440c6bfebaa57c58bf54818012316ff8bd8ec",
     "browser-stdout": "1.2.0",
+    "concat-stream": "^1.5.0",
     "end-of-stream": "1.1.0",
     "express": "^4.13.1",
     "from": "0.1.3",
+    "hyperscript": "^1.4.6",
     "iframe-sandbox": "4.0.0",
-    "request": "^2.55.0",
+    "tap-finished": "0.0.1",
     "tape": "4.0.0",
-    "treeify": "1.0.1"
+    "treeify": "1.0.1",
+    "wrap-stream": "^2.0.0"
   }
 }
