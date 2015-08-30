@@ -1,6 +1,7 @@
 const async = require('async')
 const express = require('express')
 const request = require('request')
+const cors = require('cors')
 const HtmlTransform = require('./index.js').HtmlTransform
 const JsTransform = require('./index.js').JsTransform
 const CssTransform = require('./index.js').CssTransform
@@ -21,6 +22,7 @@ async.waterfall([
 
 function startServer(environment, cb){
   var app = express()
+  app.use(cors())
 
   // transform html
   app.get('/html/:target', function(req, res) {

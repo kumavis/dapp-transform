@@ -19,7 +19,7 @@ generateEnvironment({}, function(err, environment){
   }).listen('9021')
 
   var browser = run({
-    // browser: 'chrome',
+    browser: 'firefox',
     input: 'html',
   })
   var source = browserify('./test/index.js')

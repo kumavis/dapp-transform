@@ -1,9 +1,11 @@
 // const h = require('hyperscript')
 // const from = require('from')
 // const concat = require('concat-stream')
-// const HtmlTransform = require('../../index.js').HtmlTransform
+const util = require('../../lib/util.js')
 
 const targetUrl = 'http://happydapp.io/toothpaste/'
+const relativeUrl = './relative_location'
+
 
 
 module.exports = function(test){
@@ -12,22 +14,13 @@ module.exports = function(test){
     t.plan(2)
 
     t.equal(window.location.href, targetUrl, 'window.location.href is overwritten')
-    t.ok(false)
 
-    // var anchor = h('a', { href: './relative_location' })
-    // var html = htmlBody(anchor).outerHTML
+    var anchor = document.createElement('a')
+    anchor.setAttribute('href', relativeUrl)
 
-    // standardHtmlTest({
-    //   targetUrl: targetUrl,
-    //   environment: environment,
-    //   html: html,
-    // }, function(err, dom){
-    //   if (err) return t.end(err)
-      
-    //   var href = dom('a').eq(0).attr('href')
-    //   t.equal(href, 'https://transform.metamask.io/html/http%3A%2F%2Fhappydapp.io%2Ftoothpaste%2Frelative_location',
-    //     'anchor tag href correctly rewritten')
-    // })
+    var expectedUrl = util.transformUrlForLocalNav(relativeUrl)
+
+    t.equal(anchor.href, expectedUrl, 'runtime-generated anchor tag is rebased')
 
   })
 
