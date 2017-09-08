@@ -19,6 +19,8 @@ actually reference the 'fakeWindow' and 'fakeDocument' created in the initializa
 
 # DOM notes
 
+[![Greenkeeper badge](https://badges.greenkeeper.io/kumavis/dapp-transform.svg)](https://greenkeeper.io/)
+
 ### navigation and routing
 
 app routing happens in a number of ways.
